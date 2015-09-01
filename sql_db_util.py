@@ -82,7 +82,7 @@ for row in cursor:
    print "SMA = ", row[3]
    print "SMA50 = ", row[4], "\n"
 
-print "Operation done successfully";
+#print "Operation done successfully";
 
 #sqconn.execute("UPDATE COMPANY set SALARY = 25000.00 where ID=1")
 #sqconn.commit
