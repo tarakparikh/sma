@@ -5,3 +5,6 @@ git status
 vi sql_db_util.py
 git commit -a
 git push -u origin master
+git checkout yahoostock.py 
+git push -u origin master
+git pull --rebase origin master
