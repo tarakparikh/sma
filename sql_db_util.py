@@ -108,7 +108,6 @@ for row in cursor:
    #print "ADDRESS = ", row[2]
    #print "SALARY = ", row[3], "\n"
 #
-#print "Operation done successfully";
 sqconn.close()
 
 def open_writer(dbname,data):
