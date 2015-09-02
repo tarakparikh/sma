@@ -1,0 +1,7 @@
+cd SMA
+git clone https://github.com/tarakparikh/sma.git
+cd sma/
+git status
+vi sql_db_util.py
+git commit -a
+git push -u origin master
