@@ -191,7 +191,7 @@ def get_price_for_list(symArray):
 #print get_historical_prices('^RUT','20130112','20131012');
 #print get_historical_prices('GOOG','20130112','20131012');
 
-#lArray = ['GOOG','MSFT','AAPL'];
+lArray = ['GOOG','MSFT','AAPL'];
 #xx = get_price_for_list(lArray)
 #print xx
 #for i in xx:
