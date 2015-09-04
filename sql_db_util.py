@@ -30,10 +30,9 @@ sqconn.execute('''CREATE TABLE STOCK_SMA50
 
 sqconn.execute('''CREATE TABLE DATETABLE
        (
-       ID INT PRIMARY KEY  NOT NULL,
-       PRICE           TEXT    NOT NULL,
-       SMA        TEXT    ,
-       SMA50      TEXT    );''')
+       ID INT PRIMARY KEY     NOT NULL,
+       TODAY           TEXT    NOT NULL
+       );''')
 
 sqconn.execute('''CREATE TABLE COMPANIES
        (ID INT PRIMARY KEY     NOT NULL,
@@ -114,9 +113,10 @@ def open_writer(dbname,data):
     sqconn = sqlite3.connect("mystk.db");
     today = date.today()
     today_ordinal = date.toordinal(today)
-    fname = "db/stocks." + dbname + "." + "%s" % (today_ordinal) + ".csv"
-    print fname
-    writer = csv.writer(open(fname, 'wb', buffering=0))
+    sqconn.execute("UPDATE DATETABLE SET TODAY = ? WHERE ID=1", today_ordinal);
+    #fname = "db/stocks." + dbname + "." + "%s" % (today_ordinal) + ".csv"
+    #print fname
+    #writer = csv.writer(open(fname, 'wb', buffering=0))
     return writer
 
 #
@@ -142,12 +142,13 @@ def check_update(dbname):
     dbFound = 0
     today_ordinal = date.toordinal(today)
     sqconn = sqlite3.connect("mystk.db");
-    cursor = sqconn.execute("SELECT ? from DateTable",dbname)
+    cursor = sqconn.execute("SELECT TODAY from DateTable")
     for row in cursor:
 	stored_date = row[0];
     if (stored_date == today_ordinal):
 	dbFound = 1
 
+    sqconn.close()
     return dbFound
 
 print "Connected succesffuly"
