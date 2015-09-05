@@ -14,17 +14,17 @@ import sqlite3
 
 sqconn = sqlite3.connect("mystk.db");
 sqconn.execute('''CREATE TABLE STOCK_PRICES
-       (ID INT PRIMARY KEY     NOT NULL,
+       (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
        SYMBOL           TEXT    NOT NULL,
        VAL        REAL    );''')
 
 sqconn.execute('''CREATE TABLE STOCK_SMA
-       (ID INT PRIMARY KEY     NOT NULL,
+       (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
        SYMBOL           TEXT    NOT NULL,
        VAL      REAL    );''')
 
 sqconn.execute('''CREATE TABLE STOCK_SMA50
-       (ID INT PRIMARY KEY     NOT NULL,
+       (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
        SYMBOL           TEXT    NOT NULL,
        VAL      REAL    );''')
 
@@ -39,13 +39,18 @@ sqconn.execute('''CREATE TABLE COMPANIES
 	NAME TEXT 		NOT NULL,
        SYMBOL           TEXT    NOT NULL);''')
 
-sqconn.execute("INSERT INTO STOCKS (ID,SYMBOL,PRICE) \
-      VALUES (1, 'MSFT', 100.0 )");
+sqconn.execute("INSERT INTO STOCK_PRICES (SYMBOL,VAL) \
+      VALUES ('MSFT', 100.0 )");
 
 my_tuple_arr = (
-	(2, "CSCO", 25.0),
-	(3, "INTC", 25.0),
-	(4, "JNPR", 25.0)
+	("CSCO", 25.0),
+	("INTC", 25.0),
+	("JNPR", 25.0),
+	("JNPR", 25.0),
+	("JNPR", 25.0),
+	("JNPR", 25.0),
+	("JNPR", 25.0),
+	("JNPR", 25.0)
 )
 
 my_tuple_sma_arr = (
@@ -61,11 +66,25 @@ my_tuple_sma50_arr = (
 	(29.0,3),
 	(25.0,4)
 )
-sqconn.executemany("INSERT INTO STOCKS (ID,SYMBOL,PRICE) \
-      VALUES (?, ?, ?)", my_tuple_arr);
+sqconn.executemany("INSERT INTO STOCK_PRICES (SYMBOL,VAL) \
+      VALUES (?, ?)", my_tuple_arr);
 
-sqconn.executemany("UPDATE STOCKS SET SMA = ? WHERE ID=?", my_tuple_sma_arr);
-sqconn.executemany("UPDATE STOCKS SET SMA50 = ? WHERE ID=?", my_tuple_sma50_arr);
+abc = "MSFT"
+myList = [
+	20.0,
+	25.0,
+	23.0,
+	24.0
+]
+
+my_type_arr_2 = tuple([tuple([abc,row]) for row in myList]);
+print my_type_arr_2
+
+sqconn.executemany("INSERT INTO STOCK_PRICES (SYMBOL,VAL) \
+      VALUES (?, ?)", my_type_arr_2);
+
+#sqconn.executemany("UPDATE STOCK_PRICES SET SMA = ? WHERE ID=?", my_tuple_sma_arr);
+#sqconn.executemany("UPDATE STOCKS SET SMA50 = ? WHERE ID=?", my_tuple_sma50_arr);
 
 #sqconn.execute("INSERT INTO NEWCOMPANY (ID, NAME,AGE,ADDRESS,SALARY) \
 #SELECT ID, NAME,AGE,ADDRESS,SALARY \
@@ -73,13 +92,11 @@ sqconn.executemany("UPDATE STOCKS SET SMA50 = ? WHERE ID=?", my_tuple_sma50_arr)
 
 sqconn.commit()
 print "Records created successfully";
-cursor = sqconn.execute("SELECT id, symbol, price, sma, sma50  from STOCKS")
+cursor = sqconn.execute("SELECT id, symbol, val  from STOCK_PRICES")
 for row in cursor:
    print "ID = ", row[0]
    print "SYMBOL = ", row[1]
-   print "PRICE = ", row[2]
-   print "SMA = ", row[3]
-   print "SMA50 = ", row[4], "\n"
+   print "VAL = ", row[2], "\n"
 
 #print "Operation done successfully";
 
@@ -120,11 +137,31 @@ def open_writer(dbname,data):
     return writer
 
 #
+def write_history_symbol (dbname, data):
+    sqconn = sqlite3.connect("mystk.db");
+    symbol = data[0];
+    data.delete(0);
+    my_type_arr_2 = tuple([tuple([symbol,row]) for row in data]);
+    sqconn.executemany("INSERT INTO dbname (SYMBOL,VAL) \
+          VALUES (?, ?)", my_type_arr_2);
+    sqconn.commit()
+    #fname = "db/stocks." + dbname + "." + "%s" % (today_ordinal) + ".csv"
+    #print fname
+    #writer = csv.writer(open(fname, 'wb', buffering=0))
+    #return writer
+
+def write_history_day (dbname, data):
+    sqconn = sqlite3.connect("mystk.db");
+    sqconn.execute("UPDATE DATETABLE SET TODAY = ? WHERE ID=1", today_ordinal);
+    my_type_arr_2 = tuple([tuple([row]) for row in data]);
+    sqconn.executemany("INSERT INTO dbname (SYMBOL,VAL) \
+          VALUES (?, ?)", my_type_arr_2);
+    sqconn.commit()
 
 def open_reader(dataname):
     stocks = [];
     sqconn = sqlite3.connect("mystk.db");
-    cursor = sqconn.execute("SELECT DISTINCT symbol from STOCKS")
+    cursor = sqconn.execute("SELECT DISTINCT symbol from STOCK_PRICES")
     for row in cursor:
 	rowVal = [];
 	symbolName = row[0];
