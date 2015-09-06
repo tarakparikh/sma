@@ -46,7 +46,8 @@ def open_writer(dbname,data):
     today = date.today()
     today_ordinal = date.toordinal(today)
     sqconn.execute("UPDATE DATETABLE SET TODAY = ? WHERE ID=1", today_ordinal);
-    return writer
+    sqconn.commit()
+    sqconn.close();
 
 #
 def write_history_symbol (dbname, data):
@@ -59,11 +60,22 @@ def write_history_symbol (dbname, data):
     sqconn.commit()
     sqconn.close();
 
+def write_historical_prices(dbname,allData):
+    for priceRow in allData:
+	write_history_symbol(dbname,priceRow);
+
 def write_daily_values (dbname, data):
     sqconn = sqlite3.connect("mystk.db");
     my_type_arr_2 = tuple([tuple(row) for row in data]);
-    print my_type_arr_2;
     my_query_str = "INSERT INTO " + dbname + "(SYMBOL,VAL) VALUES (?, ?)"
+    sqconn.executemany( my_query_str, my_type_arr_2);
+    sqconn.commit()
+    sqconn.close();
+
+def write_names (dbname, data):
+    sqconn = sqlite3.connect("mystk.db");
+    my_type_arr_2 = tuple([tuple(row) for row in data]);
+    my_query_str = "INSERT INTO COMPANIES (SYMBOL,NAME) VALUES (?, ?)"
     sqconn.executemany( my_query_str, my_type_arr_2);
     sqconn.commit()
     sqconn.close();
@@ -86,6 +98,15 @@ def open_reader(dbname):
    
     sqconn.close()
     return stocks; 
+
+def open_names():
+    stocks = [];
+    sqconn = sqlite3.connect("mystk.db");
+    cursor = sqconn.execute("SELECT SYMBOL,NAME from COMPANIES")
+    for row in cursor:
+	stocks.append(list(row));
+    return stocks;
+
 
 def check_update(dbname):
     today = date.today()

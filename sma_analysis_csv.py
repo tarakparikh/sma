@@ -21,7 +21,6 @@ import threadingCls
 from trigger_analysis import  trigger_analysis
 #from option_prices_cls import option_class
 import  option_prices_cls
-import  sql_db_util
 
 
 #linewidth = 120
@@ -176,8 +175,8 @@ class sma_analysis:
 		writer.writerows(self.nameArray)
 
 
-	def _populate_all_dbs_for_symbols(self,symbolList):
-    		for ix1 in symbolList:
+	def _add_to_sma_db(self,smalist):
+    		for ix1 in smalist:
 			print ix1
 			if self._find_price_list(ix1) == 0:
 				print 'Adding ',ix1
@@ -188,14 +187,17 @@ class sma_analysis:
 		    		self.nameArray.append([ix1,name])
 	    			self.sma50Array.append(self._gen_sma50_array_for_40_days(priceVal))
 	
-		sql_db_util.open_writer();
-		sql_db_util.write_historical_prices('stock_sma',self.smaArray);
-		sql_db_util.write_historical_prices('stock_prices',self.priceArray);
-		sql_db_util.write_historical_prices('stock_sma50',self.sma50);
-		sql_db_util.write_names(self.nameArray);
+    		writer = db_util.open_writer('sma');
+    		writer.writerows(self.smaArray);
+    		writer = db_util.open_writer('price');
+    		writer.writerows(self.priceArray);
+		writer = db_util.open_writer_fixed('names')
+		writer.writerows(self.nameArray)
+		writer = db_util.open_writer_fixed('sma50')
+		writer.writerows(self.sma50Array)
 
 	def _fetch_updated_prices(self):
-    		stockArray = db_util.open_reader('stock_prices')
+    		stockArray = db_util.open_reader('price')
 		newPriceArray = [];
 		symArr = [];
 		for arr in stockArray:
@@ -216,8 +218,7 @@ class sma_analysis:
 	def update_price_db(self):
     		self.priceArray = []
 	        updatedPriceArray = self._fetch_updated_prices();
-		writeArray = [];
-    		stocks = db_util.open_reader('stock_prices')
+    		stocks = db_util.open_reader('price')
 		lIndex = 0;
     		for arr2 in stocks:
   			newarr = [];
@@ -228,16 +229,15 @@ class sma_analysis:
 			newarr.append(price)
 	    		newarr.extend(arr2[1:240])
 			self.priceArray.append(newarr)
-			writeArray.append([symbol,price]);
 			lIndex = lIndex + 1;
      	
-    		sql_db_util.write_daily_values('stock_prices',writeArray);
+    		writer = db_util.open_writer('price');
+    		writer.writerows(self.priceArray);
 
 	def update_sma_db(self):
     		stocks = db_util.open_reader('sma')
     		self.smaArray = [];
 
-		writeArray = [];
     		for arr2 in stocks:
   			newarr = [];
 			symbol = arr2[0]
@@ -246,11 +246,10 @@ class sma_analysis:
 			newarr.append(sma)
 	    		newarr.extend(arr2[1:self.numSma])
 			self.smaArray.append(newarr)
-			writeArray.append([symbol,sma]);
 
-    		sql_db_util.write_daily_values('stock_sma',writeArray);
+    		writer = db_util.open_writer('sma');
+    		writer.writerows(self.smaArray);
 
-		writeArray = [];
     		stocks = db_util.open_reader('sma50')
     		self.sma50Array = [];
     		for arr2 in stocks:
@@ -261,9 +260,7 @@ class sma_analysis:
 			newarr50.append(sma50)
 	    		newarr50.extend(arr2[1:self.numSma])
 			self.sma50Array.append(newarr50)
-			writeArray.append([symbol,sma50]);
 
-    		sql_db_util.write_daily_values('stock_sma50',writeArray);
     		writer = db_util.open_writer('sma50');
     		writer.writerows(self.sma50Array);
      
@@ -319,7 +316,7 @@ class sma_analysis:
 	 	# Open Name Db
 		#
 		self.nameArray = []
-		reader = db_util.open_names();
+		reader = db_util.open_reader_fixed('names')
 		for row in reader:
 	    	    self.nameArray.append(row)
 		 
@@ -327,7 +324,7 @@ class sma_analysis:
 	 	# Open Price Db
 		#
 		self.priceArray = []
-		reader = db_util.open_reader('stock_prices')
+		reader = db_util.open_reader('price')
 		for row in reader:
 	    	    self.priceArray.append(row)
 
@@ -335,14 +332,14 @@ class sma_analysis:
 	 	# Open SMA Db
 		#
 		self.smaArray = []
-		reader = db_util.open_reader('stock_sma')
+		reader = db_util.open_reader('sma')
 		for row in reader:
 	    	    self.smaArray.append(row)
 		#
 		# Open 50day SMA
 		#
 		self.sma50Array = []
-		reader = db_util.open_reader('stock_sma50')
+		reader = db_util.open_reader('sma50')
 		for row in reader:
 	    	    self.sma50Array.append(row)
 
@@ -353,11 +350,11 @@ class sma_analysis:
 		    #
 		    #Check if todays price file is created
 		    #
-		    reader = db_util.open_names();
+		    reader = db_util.open_reader_fixed('names')
 		    for row in reader:
 	    	        self.nameArray.append(row)
 		 
-		    if db_util.check_update('stock_prices'):
+		    if db_util.check_update('price'):
 		        print "Found Update"
 		        self._open_db()
 		    else:
@@ -386,7 +383,7 @@ class sma_analysis:
         		if line[0] != '#':
 	    			someArr.extend (line.strip().split(','))
     		if len(someArr):
-       			self._populate_all_dbs_for_symbols(someArr)
+       			self._add_to_sma_db(someArr)
 
 
 	def _read_my_holdings(self):
