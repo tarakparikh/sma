@@ -66,7 +66,7 @@ class sma_analysis:
 		    #print "%d" % (i)
 		    #print xx[i]
 	    	    x2 = xx[i];
-	    	    prArray.append(x2[1])
+	    	    prArray.append(x2[4])
 	
 		for i in range (1,self.numSma+1):
 	    	    sma = 0.0
@@ -103,7 +103,7 @@ class sma_analysis:
 	    	    for mm in range (i,i+50):
 			sma += float(arr2[mm]);
 	    	    sma = sma / 50.0
-	    	retArray.append(sma)
+	    	    retArray.append(sma)
 		return retArray
 
 	def _update_sma50_array_to_40_days(self):
@@ -191,7 +191,7 @@ class sma_analysis:
 		sql_db_util.open_writer();
 		sql_db_util.write_historical_prices('stock_sma',self.smaArray);
 		sql_db_util.write_historical_prices('stock_prices',self.priceArray);
-		sql_db_util.write_historical_prices('stock_sma50',self.sma50);
+		sql_db_util.write_historical_prices('stock_sma50',self.sma50Array);
 		sql_db_util.write_names(self.nameArray);
 
 	def _fetch_updated_prices(self):
@@ -264,8 +264,6 @@ class sma_analysis:
 			writeArray.append([symbol,sma50]);
 
     		sql_db_util.write_daily_values('stock_sma50',writeArray);
-    		writer = db_util.open_writer('sma50');
-    		writer.writerows(self.sma50Array);
      
 
 
@@ -319,7 +317,7 @@ class sma_analysis:
 	 	# Open Name Db
 		#
 		self.nameArray = []
-		reader = db_util.open_names();
+		reader = sql_db_util.open_names();
 		for row in reader:
 	    	    self.nameArray.append(row)
 		 
@@ -327,7 +325,7 @@ class sma_analysis:
 	 	# Open Price Db
 		#
 		self.priceArray = []
-		reader = db_util.open_reader('stock_prices')
+		reader = sql_db_util.open_reader('stock_prices')
 		for row in reader:
 	    	    self.priceArray.append(row)
 
@@ -335,16 +333,26 @@ class sma_analysis:
 	 	# Open SMA Db
 		#
 		self.smaArray = []
-		reader = db_util.open_reader('stock_sma')
+		reader = sql_db_util.open_reader('stock_sma')
 		for row in reader:
 	    	    self.smaArray.append(row)
 		#
 		# Open 50day SMA
 		#
 		self.sma50Array = []
-		reader = db_util.open_reader('stock_sma50')
+		reader = sql_db_util.open_reader('stock_sma50')
 		for row in reader:
 	    	    self.sma50Array.append(row)
+
+	def _print_dbs(self):
+		for row in self.nameArray:
+		    print row;
+		for row in self.priceArray:
+		    print row;
+		for row in self.smaArray:
+		    print row;
+		for row in self.sma50Array:
+		    print row;
 
 	def update_and_open_db(self):
 		if self.analysis_only:
@@ -648,10 +656,13 @@ smaobj = sma_analysis(options.analysis_only,options.update_only,options.mailit,o
 #smaobj.populate_sma_db(smalist)
 #smaobj.populate_name_db()
 #smaobj._update_sma_array_to_40_days()
-smaobj.run_program()
+######     smaobj.run_program()
 #smaobj.create_50day_sma()
 #smaobj.run_checks()
 #smaobj.re_order_based_on_names()
-#smaobj.update_symbol_list()
+sql_db_util.create_tables();
+smaobj.update_symbol_list()
+smaobj._open_db()
+smaobj._print_dbs()
 
 sys.exit(0)
