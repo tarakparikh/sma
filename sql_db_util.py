@@ -54,7 +54,10 @@ def write_history_symbol (dbname, data):
     sqconn = sqlite3.connect("mystk.db");
     symbol = data[0];
     del data[0];
+    for row in data:
+        print " BEFORE TUPLE " + row;
     my_type_arr_2 = tuple([tuple([symbol,row]) for row in data]);
+    print " THIS IS TUPLE DATA " + my_type_arr_2;
     my_query_str = "INSERT INTO " + dbname + "(SYMBOL,VAL) VALUES (?, ?)"
     sqconn.executemany( my_query_str, my_type_arr_2);
     sqconn.commit()
@@ -85,16 +88,17 @@ def open_reader(dbname):
     sqconn = sqlite3.connect("mystk.db");
     cursor = sqconn.execute("SELECT DISTINCT symbol from STOCK_PRICES")
     for row in cursor:
-	rowVal = [];
-	symbolName = row[0];
-	print symbolName;
-	rowVal.append(symbolName);
-	sel_query = "SELECT VAL from " + dbname + " where SYMBOL='" + symbolName + "'";
-	print sel_query;
-	symData = sqconn.execute(sel_query);
-	for val in symData:
-	    rowVal.append(val[0]);
-	stocks.append(rowVal);
+       rowVal = [];
+       symbolName = row[0];
+       print symbolName;
+       rowVal.append(symbolName);
+       sel_query = "SELECT ID,VAL from " + dbname + " where SYMBOL='" + symbolName + "'";
+       print sel_query;
+       symData = sqconn.execute(sel_query);
+       for val in symData:
+            print "RETURN FROM DB " + val
+            rowVal.append(val[1]);
+	    stocks.append(rowVal);
    
     sqconn.close()
     return stocks; 
@@ -104,7 +108,7 @@ def open_names():
     sqconn = sqlite3.connect("mystk.db");
     cursor = sqconn.execute("SELECT SYMBOL,NAME from COMPANIES")
     for row in cursor:
-	stocks.append(list(row));
+	    stocks.append(list(row));
     return stocks;
 
 
@@ -115,9 +119,9 @@ def check_update(dbname):
     sqconn = sqlite3.connect("mystk.db");
     cursor = sqconn.execute("SELECT TODAY from DateTable")
     for row in cursor:
-	stored_date = row[0];
-    if (stored_date == today_ordinal):
-	dbFound = 1
+        stored_date = row[0];
+        if (stored_date == today_ordinal):
+            dbFound = 1
 
     sqconn.close()
     return dbFound
