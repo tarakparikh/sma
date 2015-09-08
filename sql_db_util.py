@@ -15,30 +15,30 @@ def create_tables():
     sqconn = sqlite3.connect("mystk.db");
     sqconn.execute('''CREATE TABLE STOCK_PRICES
        (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
-       SYMBOL           TEXT    NOT NULL,
-       VAL        REAL    );''')
+         SYMBOL           TEXT    NOT NULL,
+         VAL        REAL    );''')
 
     sqconn.execute('''CREATE TABLE STOCK_SMA
        (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
-       SYMBOL           TEXT    NOT NULL,
-       VAL      REAL    );''')
+         SYMBOL           TEXT    NOT NULL,
+         VAL      REAL    );''')
 
     sqconn.execute('''CREATE TABLE STOCK_SMA50
        (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
-       SYMBOL           TEXT    NOT NULL,
-       VAL      REAL    );''')
+         SYMBOL           TEXT    NOT NULL,
+         VAL      REAL    );''')
 
     sqconn.execute('''CREATE TABLE DATETABLE
        (
-       ID INT PRIMARY KEY     NOT NULL,
-       TODAY        INTEGER   
-       );''')
+         ID INT PRIMARY KEY     NOT NULL,
+         TODAY        INTEGER   );''')
+
     sqconn.execute("INSERT INTO DATETABLE (ID,TODAY) VALUES(1,100)");
 
     sqconn.execute('''CREATE TABLE COMPANIES
        (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
-	NAME TEXT 		NOT NULL,
-       SYMBOL           TEXT    NOT NULL);''')
+        NAME TEXT       NOT NULL,
+        SYMBOL           TEXT    NOT NULL);''')
 
     sqconn.commit;
     sqconn.close();
@@ -71,7 +71,7 @@ def write_history_symbol (dbname, data):
 
 def write_historical_prices(dbname,allData):
     for priceRow in allData:
-	write_history_symbol(dbname,priceRow);
+        write_history_symbol(dbname,priceRow);
 
 def write_daily_values (dbname, data):
     sqconn = sqlite3.connect("mystk.db");
@@ -105,21 +105,21 @@ def write_names (data):
 def open_reader(dbname):
     stocks = [];
     sqconn = sqlite3.connect("mystk.db");
-    cursor = sqconn.execute("SELECT DISTINCT symbol from STOCK_PRICES")
+    cursor = sqconn.execute("SELECT DISTINCT SYMBOL from STOCK_PRICES")
     for row in cursor:
-	rowVal = [];
-	symbolName = row[0];
-	print symbolName;
-	sel_query = "SELECT ID,VAL from " + dbname + " where SYMBOL='" + symbolName + "'";
-	#print sel_query;
-	symData = sqconn.execute(sel_query);
-	for val in symData:
-	    print "RETURN DATA ";
-	    print val;
-	    rowVal.append(val[1]);
+        rowVal = [];
+        symbolName = row[0];
+        print symbolName;
+        sel_query = "SELECT ID,VAL from " + dbname + " where SYMBOL='" + symbolName + "'";
+        #print sel_query;
+        symData = sqconn.execute(sel_query);
+        for val in symData:
+            #print "RETURN DATA ";
+            #print val;
+            rowVal.append(val[1]);
         rowVal.reverse();
-	rowVal.insert(0,symbolName);
-	stocks.append(rowVal);
+        rowVal.insert(0,symbolName);
+        stocks.append(rowVal);
    
     sqconn.close()
     return stocks; 
@@ -129,7 +129,7 @@ def open_names():
     sqconn = sqlite3.connect("mystk.db");
     cursor = sqconn.execute("SELECT SYMBOL,NAME from COMPANIES")
     for row in cursor:
-	stocks.append(list(row));
+        stocks.append(list(row));
     return stocks;
 
 
@@ -140,9 +140,9 @@ def check_update(dbname):
     sqconn = sqlite3.connect("mystk.db");
     cursor = sqconn.execute("SELECT TODAY from DateTable")
     for row in cursor:
-	stored_date = row[0];
-    if (stored_date == today_ordinal):
-	dbFound = 1
+        stored_date = row[0];
+        if (stored_date == today_ordinal):
+            dbFound = 1
 
     sqconn.close()
     return dbFound
