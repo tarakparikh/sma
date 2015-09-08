@@ -102,6 +102,13 @@ def write_names (data):
     sqconn.commit()
     sqconn.close();
 
+def get_stock_list():
+    sqconn = sqlite3.connect("mystk.db");
+    cursor = sqconn.execute("SELECT DISTINCT SYMBOL from STOCK_PRICES")
+    stocks = list(row[0] for row in cursor);
+    sqconn.close()
+    return stocks; 
+
 def open_reader(dbname):
     stocks = [];
     sqconn = sqlite3.connect("mystk.db");

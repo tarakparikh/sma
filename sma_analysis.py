@@ -194,11 +194,11 @@ class sma_analysis:
         sql_db_util.write_names(self.nameArray);
 
     def _fetch_updated_prices(self):
-        stockArray = sql_db_util.open_reader('stock_prices')
+        stockArray = sql_db_util.get_stock_list();
         newPriceArray = [];
         symArr = [];
         for arr in stockArray:
-            symArr.append(arr[0])
+            symArr.append(arr)
         totalLen = len(symArr);
         startIndex = 0;
 
@@ -360,7 +360,7 @@ class sma_analysis:
             #
             #Check if todays price file is created
             #
-            reader = db_util.open_names();
+            reader = sql_db_util.open_names();
             for row in reader:
                     self.nameArray.append(row)
          
@@ -654,13 +654,13 @@ smaobj = sma_analysis(options.analysis_only,options.update_only,options.mailit,o
 #smaobj.populate_sma_db(smalist)
 #smaobj.populate_name_db()
 #smaobj._update_sma_array_to_40_days()
-######     smaobj.run_program()
+smaobj.run_program()
 #smaobj.create_50day_sma()
-#smaobj.run_checks()
+maobj.run_checks()
 #smaobj.re_order_based_on_names()
 #sql_db_util.create_tables();
-smaobj._open_db()
-smaobj.update_symbol_list()
+#smaobj._open_db()
+#smaobj.update_symbol_list()
 #smaobj._print_dbs()
 
 sys.exit(0)
