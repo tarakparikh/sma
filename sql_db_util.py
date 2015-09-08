@@ -140,7 +140,7 @@ def open_names():
     return stocks;
 
 
-def check_update(dbname):
+def check_update():
     today = date.today()
     dbFound = 0
     today_ordinal = date.toordinal(today)

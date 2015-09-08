@@ -364,7 +364,7 @@ class sma_analysis:
             for row in reader:
                     self.nameArray.append(row)
          
-            if db_util.check_update('stock_prices'):
+            if sql_db_util.check_update():
                 print "Found Update"
                 self._open_db()
             else:
