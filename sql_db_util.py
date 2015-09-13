@@ -20,17 +20,20 @@ def create_tables():
 
     sqconn.execute('''CREATE TABLE STOCK_SMA
        (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
+         DATEVAL    INTEGER,
          SYMBOL           TEXT    NOT NULL,
          VAL      REAL    );''')
 
     sqconn.execute('''CREATE TABLE STOCK_SMA50
        (ID INTEGER PRIMARY KEY     AUTOINCREMENT,
+         DATEVAL    INTEGER,
          SYMBOL           TEXT    NOT NULL,
          VAL      REAL    );''')
 
     sqconn.execute('''CREATE TABLE DATETABLE
        (
          ID INT PRIMARY KEY     NOT NULL,
+         DATEVAL    INTEGER,
          TODAY        INTEGER   );''')
 
     sqconn.execute("INSERT INTO DATETABLE (ID,TODAY) VALUES(1,100)");
@@ -58,26 +61,51 @@ def write_history_symbol (dbname, data):
     symbol = data[0];
     del data[0];
     data.reverse();
-    for row in data:
-        print "WRITE ROW ";
-        print row;
-    my_type_arr_2 = tuple([tuple([symbol,row]) for row in data]);
-    print "TUPLE DATA " ;
-    print my_type_arr_2;
-    my_query_str = "INSERT INTO " + dbname + "(SYMBOL,VAL) VALUES (?, ?)"
+    today = date.today()
+    today_ordinal = date.toordinal(today)
+    datelist = [];
+    numRows = len(data);
+    today_ordinal -= numRows;
+    for i in range(0,numRows):
+        today_ordinal += 1;
+        datelist.append(today_ordinal);
+
+    my_type_arr_2 = tuple([tuple([datelist[i],symbol,row[i]]) for i in range (0,numRows)]);
+    my_query_str = "INSERT INTO " + dbname + "(DATEVAL, SYMBOL,VAL) VALUES (?, ?, ?)"
     sqconn.executemany( my_query_str, my_type_arr_2);
     sqconn.commit()
     sqconn.close();
 
 def write_historical_prices(dbname,allData):
+    open_writer();
     for priceRow in allData:
         write_history_symbol(dbname,priceRow);
 
-def write_daily_values (dbname, data):
+def check_if_today_written (today_ordinal):
     sqconn = sqlite3.connect("mystk.db");
-    my_type_arr_2 = tuple([tuple(row) for row in data]);
-    my_query_str = "INSERT INTO " + dbname + "(SYMBOL,VAL) VALUES (?, ?)"
-    sqconn.executemany( my_query_str, my_type_arr_2);
+    sel_query = "SELECT ID,VAL from STOCK_PRICES  where SYMBOL='GOOG' AND DATEVAL='" + today_ordinal + "'";
+    cursor = sqconn.execute(sel_query);
+    sqconn.close();
+    if (len(cursor)):
+        return 1;
+
+    return 0;
+
+def write_daily_values (dbname, data):
+    open_writer();
+    sqconn = sqlite3.connect("mystk.db");
+    today = date.today()
+    today_ordinal = date.toordinal(today)
+    today_written = check_if_today_written(today_ordinal);
+    if (today_written):
+        my_type_arr_2 = tuple([tuple([row[1],today_ordinal,row[0]]) for row in data]);
+        my_query_str = "UPDATE " + dbname + " SET VAL = ? WHERE DATEVAL=? AND SYMBOL=?";
+        sqconn.executemany( my_query_str, my_type_arr_2);
+    else
+        my_type_arr_2 = tuple([tuple([today_ordinal,row[0],row[1]]) for row in data]);
+        my_query_str = "INSERT INTO " + dbname + "(DATEVAL,SYMBOL,VAL) VALUES (?, ?, ?)"
+        sqconn.executemany( my_query_str, my_type_arr_2);
+
     sqconn.commit()
     sqconn.close();
 

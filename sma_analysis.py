@@ -132,7 +132,7 @@ class sma_analysis:
         for ix in self.nameArray:
             if ix[0] == symbol:
                 return ix[1]
-        return 0
+        return "" 
 
     def _calc_200_day_sma(self,symbol):
         xx = self._find_price_list(symbol)
@@ -656,7 +656,7 @@ smaobj = sma_analysis(options.analysis_only,options.update_only,options.mailit,o
 #smaobj._update_sma_array_to_40_days()
 smaobj.run_program()
 #smaobj.create_50day_sma()
-maobj.run_checks()
+#smaobj.run_checks()
 #smaobj.re_order_based_on_names()
 #sql_db_util.create_tables();
 #smaobj._open_db()
