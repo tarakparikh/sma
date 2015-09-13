@@ -659,6 +659,7 @@ smaobj.run_program()
 #smaobj.run_checks()
 #smaobj.re_order_based_on_names()
 #sql_db_util.create_tables();
+#sql_db_util.delete_db('companies');
 #smaobj._open_db()
 #smaobj.update_symbol_list()
 #smaobj._print_dbs()

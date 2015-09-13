@@ -24,7 +24,7 @@ print "ARGUMENTS PARSED ",options, args
 
 #Print
 
-sqconn = sqlite3.connect("mystk.db");
+sqconn = sqlite3.connect("mmm.db");
 sqconn.execute('''CREATE TABLE STOCKS
        (ID INT PRIMARY KEY     NOT NULL,
        SYMBOL           TEXT    NOT NULL,
@@ -33,9 +33,8 @@ sqconn.execute('''CREATE TABLE STOCKS
        SMA50      REAL    );''')
 
 sqconn.execute('''CREATE TABLE COMPANIES
-       (ID INT PRIMARY KEY     NOT NULL,
-	NAME TEXT 		NOT NULL,
-       SYMBOL           TEXT    NOT NULL);''')
+       ( SYMBOL TEXT PRIMARY KEY NOT NULL,
+       NAME           TEXT    NOT NULL);''')
 
 sqconn.execute("INSERT INTO STOCKS (ID,SYMBOL,PRICE) \
       VALUES (1, 'MSFT', 100.0 )");
@@ -47,10 +46,10 @@ my_tuple_arr = (
 )
 
 my_tuple_sma_arr = (
-	(20.0,1),
-	(25.0,2),
-	(25.0,3),
-	(25.0,4)
+	(20.0,1,'MSFT'),
+	(25.0,2,'CSCO'),
+	(25.0,3,'INTC'),
+	(25.0,4,'JNPR')
 )
 
 my_tuple_sma50_arr = (
@@ -62,7 +61,7 @@ my_tuple_sma50_arr = (
 sqconn.executemany("INSERT INTO STOCKS (ID,SYMBOL,PRICE) \
       VALUES (?, ?, ?)", my_tuple_arr);
 
-sqconn.executemany("UPDATE STOCKS SET SMA = ? WHERE ID=?", my_tuple_sma_arr);
+sqconn.executemany("UPDATE STOCKS SET SMA = ? WHERE ID=? AND SYMBOL=?", my_tuple_sma_arr);
 sqconn.executemany("UPDATE STOCKS SET SMA50 = ? WHERE ID=?", my_tuple_sma50_arr);
 
 #sqconn.execute("INSERT INTO NEWCOMPANY (ID, NAME,AGE,ADDRESS,SALARY) \
@@ -106,6 +105,39 @@ print "Operation done successfully";
    #print "SALARY = ", row[3], "\n"
 #
 #print "Operation done successfully";
-sqconn.close()
 
-print "Connected succesffuly"
+cursor = sqconn.execute("SELECT symbol from STOCKS")
+stocks = list(row[0] for row in cursor);
+print stocks;
+
+cursor = sqconn.execute("SELECT symbol from STOCKS")
+stocks2 = list(cursor);
+print stocks2;
+
+my_tuple_name_arr = (
+	('MSFT',"MICRO SOFT"),
+	('INTC',"INTEL CORP"),
+	('CSCO',"CISCO CORP ")
+)
+
+sqconn.executemany("INSERT INTO COMPANIES (SYMBOL,NAME) \
+      VALUES (?, ?)", my_tuple_name_arr);
+
+cursor = sqconn.execute("SELECT SYMBOL,NAME from COMPANIES")
+stocks2 = list(cursor);
+print stocks2;
+
+my_tuple_name_arr = (
+	('JNPR',"JUNIPER SOFT"),
+	('INTC',"INTEL CORP"),
+	('CSCO',"CISCO CORP ")
+)
+
+sqconn.executemany("INSERT OR IGNORE INTO COMPANIES (SYMBOL,NAME) \
+      VALUES (?, ?)", my_tuple_name_arr);
+
+cursor = sqconn.execute("SELECT SYMBOL,NAME from COMPANIES")
+stocks2 = list(cursor);
+print stocks2;
+
+sqconn.close()
